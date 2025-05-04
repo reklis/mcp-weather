@@ -14,7 +14,7 @@ This MCP server allows large language models (like Claude) to access real-time w
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/mcp-weather.git
+   git clone https://github.com/TimLukaHorstmann/mcp-weather.git
    cd mcp-weather
    ```
 
