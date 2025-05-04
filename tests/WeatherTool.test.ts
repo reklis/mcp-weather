@@ -62,7 +62,7 @@ describe("WeatherTool", () => {
   it("should handle validation errors", async () => {
     const invalidInput = { sessionId: "not-a-uuid", location: "London" };
     const resp = await handler(invalidInput, mockExtra);
-    expect(resp.content[0].text).toContain("Invalid input: sessionId: Invalid uuid");
+    expect(resp.content[0].text).toContain("Invalid input: sessionId: Must be a valid UUID");
     expect(mockedAxios.get).not.toHaveBeenCalled(); // Axios should not be called on validation error
   });
 

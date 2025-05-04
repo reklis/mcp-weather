@@ -3,15 +3,18 @@ import axios from "axios";
 import type { TextContent } from "@modelcontextprotocol/sdk/types.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
-
-// 1) Raw Zod shape (what server.tool() expects)
+// 1) Raw Zod shape (OpenAI-compatible JSON Schema)
 export const inputShape = {
-  sessionId: z.string().uuid().describe("Unique session ID"),
-  location: z.string().min(1).describe("City name or coordinates"),
+  sessionId: z.string()
+    .regex(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      "Must be a valid UUID"
+    ),
+  location: z.string().min(1),
 };
 
 // 2) Full schema for your own validation/tests
-export const inputSchema = z.object(inputShape);
+export const inputSchema = z.object(inputShape).describe("Get hourly weather forecast");
 
 // 3) Handler: Accept generic args and validate inside
 export async function handler(
