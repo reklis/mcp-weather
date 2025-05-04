@@ -1,6 +1,9 @@
 {
   "name": "mcp-weather",
   "version": "0.1.0",
+  "bin": {
+    "mcp-weather": "./build/index.js"
+  },
   "description": "MCP server that provides hourly weather forecasts using the AccuWeather API",
   "type": "module",
   "main": "build/index.js",
