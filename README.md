@@ -1,12 +1,17 @@
 # MCP Weather Server
 
 ![npm version](https://img.shields.io/npm/v/@timlukahorstmann/mcp-weather)
+![license](https://img.shields.io/github/license/TimLukaHorstmann/mcp-weather)
+![node version](https://img.shields.io/node/v/@timlukahorstmann/mcp-weather)
+![issues](https://img.shields.io/github/issues/TimLukaHorstmann/mcp-weather)
 
 <p align="center">
   <img src="logo.png" alt="MCP Weather Server Logo" width="250"/>
 </p>
 
 A Model Context Protocol (MCP) server that provides hourly weather forecasts using the AccuWeather API.
+
+---
 
 ## Overview
 
@@ -17,37 +22,60 @@ This MCP server allows large language models (like Claude) to access real-time w
 - Access temperature, conditions, and other weather details
 
 ## Prerequisites
+
 - Node.js ≥18  
 - An AccuWeather API key (set via `.env` or your shell)
 
 ## Setup
 
-1. Clone this repository:
+1. **Clone this repository:**
    ```bash
    git clone https://github.com/TimLukaHorstmann/mcp-weather.git
    cd mcp-weather
    ```
 
-2. Install dependencies:
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-3. Get an AccuWeather API key:
+3. **Get an AccuWeather API key:**
    - Register at [AccuWeather API](https://developer.accuweather.com/)
    - Create a new app and obtain an API key
 
-4. Create a `.env` file with your API key:
+4. **Create a `.env` file with your API key:**
    ```
    ACCUWEATHER_API_KEY=your_api_key_here
    ```
 
-5. Build the project:
+5. **Build the project:**
    ```bash
    npm run build
    ```
 
-## Usage with Claude Desktop
+## Usage
+
+### Quick Start (via npx)
+
+You can run the MCP Weather server directly with:
+
+```bash
+npx -y @timlukahorstmann/mcp-weather
+```
+
+Or, for HTTP/REST access via [supergateway](https://github.com/supercorp-ai/supergateway):
+
+```bash
+npx -y supergateway --stdio "npx -y @timlukahorstmann/mcp-weather" \
+  --port 4004 \
+  --baseUrl http://127.0.0.1:4004 \
+  --ssePath /messages \
+  --messagePath /message \
+  --cors "*" \
+  --env ACCUWEATHER_API_KEY="$ACCUWEATHER_API_KEY"
+```
+
+### Usage with Claude Desktop
 
 1. Configure Claude Desktop to use this MCP server:
    - Open Claude Desktop
@@ -77,48 +105,13 @@ This MCP server allows large language models (like Claude) to access real-time w
    - "Will it rain in London tomorrow?"
    - "How hot will it be in Tokyo this afternoon?"
 
-## Usage with mcp.json
-
-You can also integrate this server into any MCP-compatible app using an `mcp.json` config. Example:
-
-```json
-{
-  "mcp": {
-    "servers": {
-      "weather": {
-        "command": "uvx",
-        "args": ["--from", "git+https://github.com/TimLukaHorstmann/mcp-weather.git", "mcp-weather"],
-        "env": {
-          "ACCUWEATHER_API_KEY": "${input:accuweather_api_key}"
-        }
-      }
-    }
-  }
-}
-```
-
-## Running with Supergateway
-
-You can run this server with [supergateway](https://github.com/supercorp-ai/supergateway) for HTTP/REST access:
-
-```bash
-npx -y supergateway --stdio "uvx --from git+https://github.com/TimLukaHorstmann/mcp-weather.git mcp-weather" \
-  --port 4004 \
-  --baseUrl http://127.0.0.1:4004 \
-  --ssePath /messages \
-  --messagePath /message \
-  --cors "*" \
-  --env ACCUWEATHER_API_KEY="$ACCUWEATHER_API_KEY"
-```
-
-This will expose the MCP weather server on port 4004.
-
 ## Development
+
 - Install dev dependencies: `npm install`
-- Lint your code:       `npm run lint`  
-- Build:                `npm run build`  
-- Run tests:            `npm test`
-- Start in dev mode:    `npm run dev`
+- Lint your code:           `npm run lint`  
+- Build:                    `npm run build`  
+- Run tests:                `npm test`
+- Start in dev mode:        `npm run dev`
 
 ## Contributing
 
@@ -126,4 +119,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
