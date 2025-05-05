@@ -3,56 +3,64 @@ import axios from "axios";
 import type { TextContent } from "@modelcontextprotocol/sdk/types.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
-// 1) Raw Zod shape (OpenAI-compatible JSON Schema)
+// Zod schemas for validation
 export const inputShape = {
-  sessionId: z.string()
-    .regex(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
-      "Must be a valid UUID"
-    ),
-  location: z.string().min(1),
+  sessionId: z.string().min(1, "SessionId must be at least 1 character"),
+  location: z.string().min(1, "Location must be at least 1 character"),
 };
 
-// 2) Full schema for your own validation/tests
 export const inputSchema = z.object(inputShape).describe("Get hourly weather forecast");
 
-// 3) Handler: Accept generic args and validate inside
+// JSON schema for tool registration (OpenAI-compatible)
+export const inputJsonSchema = {
+  type: "object",
+  description: "Parameters for the hourly weather-forecast tool",
+  properties: {
+    sessionId: {
+      type: "string",
+      description: "A unique session identifier (UUID)",
+    },
+    location: {
+      type: "string",
+      description: "The location to fetch the 12-hour forecast for",
+    },
+  },
+  required: ["sessionId", "location"],
+  additionalProperties: false,
+};
+
+// Handler function remains unchanged
 export async function handler(
-    args: { [x: string]: any; }, // Accept generic args type
-    extra: RequestHandlerExtra<any, any>
-  ): Promise<{ content: TextContent[] }> {
-
-    // Validate args using the schema inside the handler
-    let validatedArgs: z.infer<typeof inputSchema>;
-    try {
-        validatedArgs = inputSchema.parse(args);
-    } catch (error) {
-        // Handle validation errors
-        if (error instanceof z.ZodError) {
-            const errorMessages = error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
-            return { content: [{ type: "text", text: `Invalid input: ${errorMessages}` }] };
-        }
-        // Handle unexpected errors during parsing
-        return { content: [{ type: "text", text: "An unexpected error occurred during input validation." }] };
+  args: { [x: string]: any },
+  extra: RequestHandlerExtra<any, any>
+): Promise<{ content: TextContent[] }> {
+  // Validate args using the Zod schema
+  let validatedArgs: z.infer<typeof inputSchema>;
+  try {
+    validatedArgs = inputSchema.parse(args);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const errorMessages = error.errors
+        .map((e) => `${e.path.join('.')}: ${e.message}`)
+        .join(', ');
+      return { content: [{ type: 'text', text: `Invalid input: ${errorMessages}` }] };
     }
+    return { content: [{ type: 'text', text: 'An unexpected error occurred during input validation.' }] };
+  }
 
-    const { sessionId, location } = validatedArgs; // Use validated args
-    const apiKey = process.env.ACCUWEATHER_API_KEY;
-    if (!apiKey) {
-      return { content: [{ type: "text", text: "Error: AccuWeather API key not configured" }] };
-    }
+  const { sessionId, location } = validatedArgs;
+  const apiKey = process.env.ACCUWEATHER_API_KEY;
+  if (!apiKey) {
+    return { content: [{ type: 'text', text: 'Error: AccuWeather API key not configured' }] };
+  }
 
   try {
-    // ... rest of the handler code remains the same ...
     // Step 1: Get location key
     const locationUrl = `http://dataservice.accuweather.com/locations/v1/cities/search?apikey=${apiKey}&q=${encodeURIComponent(location)}`;
     const locationResp = await axios.get(locationUrl);
 
     if (!locationResp.data || locationResp.data.length === 0) {
-        const content: TextContent[] = [
-            { type: "text" as const, text: `No location found for: ${location}` }
-            ];
-            return { content };
+      return { content: [{ type: 'text', text: `No location found for: ${location}` }] };
     }
 
     const locationKey = locationResp.data[0].Key;
@@ -64,16 +72,12 @@ export async function handler(
 
     if (!data || !Array.isArray(data) || data.length === 0) {
       return {
-        content: [{
-          type: "text",
-          text: `No weather data available for location: ${location}`
-        }]
+        content: [{ type: 'text', text: `No weather data available for location: ${location}` }]
       };
     }
 
-    // 4) Return exactly `{ content: ContentBlock[] }`
     const content: TextContent[] = data.map((hour: any) => ({
-      type: "text" as const,
+      type: 'text',
       text: `${hour.DateTime}: ${hour.Temperature.Value}°${hour.Temperature.Unit}, ${hour.IconPhrase}`,
     }));
 
@@ -94,12 +98,8 @@ export async function handler(
       }
     }
 
-    const content: TextContent[] = [
-        { type: "text" as const, text: errorMessage }
-      ];
-      return { content };
-
+    return { content: [{ type: 'text', text: errorMessage }] };
   }
 }
 
-export default { inputShape, inputSchema, handler };
+export default { inputShape, inputSchema, inputJsonSchema, handler };

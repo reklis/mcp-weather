@@ -1,5 +1,7 @@
 # MCP Weather Server
 
+![npm version](https://img.shields.io/npm/v/@timlukahorstmann/mcp-weather)
+
 <p align="center">
   <img src="logo.png" alt="MCP Weather Server Logo" width="250"/>
 </p>
@@ -13,6 +15,10 @@ This MCP server allows large language models (like Claude) to access real-time w
 - Fetch accurate, up-to-date weather forecasts
 - Provide hourly weather data for any location
 - Access temperature, conditions, and other weather details
+
+## Prerequisites
+- Node.js ≥18  
+- An AccuWeather API key (set via `.env` or your shell)
 
 ## Setup
 
@@ -108,9 +114,11 @@ npx -y supergateway --stdio "uvx --from git+https://github.com/TimLukaHorstmann/
 This will expose the MCP weather server on port 4004.
 
 ## Development
-
-- Run tests: `npm test`
-- Start in development mode: `npm run dev`
+- Install dev dependencies: `npm install`
+- Lint your code:       `npm run lint`  
+- Build:                `npm run build`  
+- Run tests:            `npm test`
+- Start in dev mode:    `npm run dev`
 
 ## Contributing
 
