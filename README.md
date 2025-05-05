@@ -13,6 +13,57 @@ A Model Context Protocol (MCP) server that provides hourly weather forecasts usi
 
 ---
 
+## Quick Start
+
+You need an AccuWeather API key (free tier available).  
+[Sign up here](https://developer.accuweather.com/) and create an app to get your key.
+
+Export your API key as an environment variable:
+
+```bash
+export ACCUWEATHER_API_KEY=your_api_key_here
+```
+
+Then run the MCP Weather server directly with:
+
+```bash
+npx -y @timlukahorstmann/mcp-weather
+```
+
+Or, for HTTP/REST access via [supergateway](https://github.com/supercorp-ai/supergateway):
+
+```bash
+npx -y supergateway --stdio "npx -y @timlukahorstmann/mcp-weather" \
+  --port 4004 \
+  --baseUrl http://127.0.0.1:4004 \
+  --ssePath /messages \
+  --messagePath /message \
+  --cors "*" \
+  --env ACCUWEATHER_API_KEY="$ACCUWEATHER_API_KEY"
+```
+
+---
+
+## MCP Server Config Example
+
+For integration with Claude Desktop or other MCP-compatible clients, add this to your config (e.g. `claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "weather": {
+      "command": "npx",
+      "args": ["-y", "@timlukahorstmann/mcp-weather"],
+      "env": {
+        "ACCUWEATHER_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+---
+
 ## Overview
 
 This MCP server allows large language models (like Claude) to access real-time weather data. When integrated with an LLM, it enables the model to:
@@ -53,29 +104,7 @@ This MCP server allows large language models (like Claude) to access real-time w
    npm run build
    ```
 
-## Usage
-
-### Quick Start (via npx)
-
-You can run the MCP Weather server directly with:
-
-```bash
-npx -y @timlukahorstmann/mcp-weather
-```
-
-Or, for HTTP/REST access via [supergateway](https://github.com/supercorp-ai/supergateway):
-
-```bash
-npx -y supergateway --stdio "npx -y @timlukahorstmann/mcp-weather" \
-  --port 4004 \
-  --baseUrl http://127.0.0.1:4004 \
-  --ssePath /messages \
-  --messagePath /message \
-  --cors "*" \
-  --env ACCUWEATHER_API_KEY="$ACCUWEATHER_API_KEY"
-```
-
-### Usage with Claude Desktop
+## Usage with Claude Desktop
 
 1. Configure Claude Desktop to use this MCP server:
    - Open Claude Desktop
@@ -86,8 +115,8 @@ npx -y supergateway --stdio "npx -y @timlukahorstmann/mcp-weather" \
    {
      "mcpServers": {
        "weather": {
-         "command": "node",
-         "args": ["/absolute/path/to/mcp-weather/build/index.js"],
+         "command": "npx",
+         "args": ["-y", "@timlukahorstmann/mcp-weather"],
          "env": {
            "ACCUWEATHER_API_KEY": "your_api_key_here"
          }
