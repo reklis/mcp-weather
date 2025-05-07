@@ -146,6 +146,16 @@ This MCP server allows large language models (like Claude) to access real-time w
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+## Future Enhancements
+
+We're always looking to improve the MCP Weather Server. Here are some features we're considering for future releases:
+
+-   **Daily Forecasts:** Option to retrieve a summary for the next few days.
+-   **Extended Hourly Forecasts:** Beyond 12 hours, e.g., 24 or 48 hours.
+-   **More Configuration Options:** e.g., preferred units (Celsius/Fahrenheit) via input.
+
+If you have ideas for other features, feel free to open an issue!
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
