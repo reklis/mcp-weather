@@ -10,6 +10,10 @@
   <img src="logo.png" alt="MCP Weather Server Logo" width="250"/>
 </p>
 
+<a href="https://glama.ai/mcp/servers/@TimLukaHorstmann/mcp-weather">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@TimLukaHorstmann/mcp-weather/badge" alt="Weather MCP server" />
+</a>
+
 A Model Context Protocol (MCP) server that provides hourly weather forecasts using the AccuWeather API.
 
 ---
