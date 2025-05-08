@@ -1,6 +1,6 @@
 {
   "name": "@timlukahorstmann/mcp-weather",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "bin": {
     "mcp-weather": "./build/index.js"
   },
