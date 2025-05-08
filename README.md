@@ -1,9 +1,10 @@
 # MCP Weather Server
 
-![npm version](https://img.shields.io/npm/v/@timlukahorstmann/mcp-weather)
-![license](https://img.shields.io/github/license/TimLukaHorstmann/mcp-weather)
-![node version](https://img.shields.io/node/v/@timlukahorstmann/mcp-weather)
-![issues](https://img.shields.io/github/issues/TimLukaHorstmann/mcp-weather)
+[![npm version](https://img.shields.io/npm/v/@timlukahorstmann/mcp-weather)](https://www.npmjs.com/package/@timlukahorstmann/mcp-weather)
+[![license](https://img.shields.io/github/license/TimLukaHorstmann/mcp-weather)](https://github.com/TimLukaHorstmann/mcp-weather/blob/main/LICENSE)
+[![node version](https://img.shields.io/node/v/@timlukahorstmann/mcp-weather)](https://www.npmjs.com/package/@timlukahorstmann/mcp-weather)
+[![issues](https://img.shields.io/github/issues/TimLukaHorstmann/mcp-weather)](https://github.com/TimLukaHorstmann/mcp-weather/issues)
+[![weekly downloads](https://img.shields.io/npm/dw/@timlukahorstmann/mcp-weather)](https://www.npmjs.com/package/@timlukahorstmann/mcp-weather)
 
 <p align="center">
   <img src="logo.png" alt="MCP Weather Server Logo" width="250"/>
