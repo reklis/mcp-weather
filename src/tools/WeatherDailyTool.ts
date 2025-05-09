@@ -7,15 +7,16 @@ import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/proto
 export const inputShape = {
   sessionId: z.string().min(1, "SessionId must be at least 1 character"),
   location: z.string().min(1, "Location must be at least 1 character"),
+  days: z.number().int().min(1).max(15).default(5).optional().describe("Number of days for forecast (1-15)"),
   units: z.enum(["imperial", "metric"]).default("metric").optional().describe("Temperature unit system")
 };
 
-export const inputSchema = z.object(inputShape).describe("Get hourly weather forecast");
+export const inputSchema = z.object(inputShape).describe("Get daily weather forecast");
 
 // JSON schema for tool registration (OpenAI-compatible)
 export const inputJsonSchema = {
   type: "object",
-  description: "Parameters for the hourly weather-forecast tool",
+  description: "Parameters for the daily weather-forecast tool",
   properties: {
     sessionId: {
       type: "string",
@@ -23,7 +24,12 @@ export const inputJsonSchema = {
     },
     location: {
       type: "string",
-      description: "The location to fetch the 12-hour forecast for",
+      description: "The location to fetch the daily forecast for",
+    },
+    days: {
+      type: "number",
+      description: "Number of days to forecast (1, 5, 10, or 15). Default is 5.",
+      enum: [1, 5, 10, 15]
     },
     units: {
       type: "string",
@@ -35,7 +41,7 @@ export const inputJsonSchema = {
   additionalProperties: false,
 };
 
-// Handler function remains unchanged
+// Handler function for daily forecast
 export async function handler(
   args: { [x: string]: any },
   extra: RequestHandlerExtra<any, any>
@@ -54,7 +60,7 @@ export async function handler(
     return { content: [{ type: 'text', text: 'An unexpected error occurred during input validation.' }] };
   }
 
-  const { sessionId, location, units = "metric" } = validatedArgs;
+  const { sessionId, location, days = 5, units = "metric" } = validatedArgs;
   const apiKey = process.env.ACCUWEATHER_API_KEY;
   if (!apiKey) {
     return { content: [{ type: 'text', text: 'Error: AccuWeather API key not configured' }] };
@@ -71,26 +77,45 @@ export async function handler(
 
     const locationKey = locationResp.data[0].Key;
 
+    // Get valid forecast period (AccuWeather supports 1, 5, 10, or 15 days)
+    let forecastDays = 5; // default
+    if (days === 1) forecastDays = 1;
+    else if (days <= 5) forecastDays = 5;
+    else if (days <= 10) forecastDays = 10;
+    else forecastDays = 15;
+
     // Step 2: Get forecast with location key
-    const forecastUrl = `http://dataservice.accuweather.com/forecasts/v1/hourly/12hour/${locationKey}?apikey=${apiKey}&metric=${units === "metric" ? "true" : "false"}`;
+    const forecastUrl = `http://dataservice.accuweather.com/forecasts/v1/daily/${forecastDays}day/${locationKey}?apikey=${apiKey}&metric=${units === "metric" ? "true" : "false"}`;
     const forecastResp = await axios.get(forecastUrl);
     const data = forecastResp.data;
 
-    if (!data || !Array.isArray(data) || data.length === 0) {
+    if (!data || !data.DailyForecasts || !Array.isArray(data.DailyForecasts) || data.DailyForecasts.length === 0) {
       return {
-        content: [{ type: 'text', text: `No weather data available for location: ${location}` }]
+        content: [{ type: 'text', text: `No daily forecast data available for location: ${location}` }]
       };
     }
 
+    const degreeSymbol = "°";
     const unitSymbol = units === "metric" ? "C" : "F";
-    const content: TextContent[] = data.map((hour: any) => ({
-      type: 'text',
-      text: `${hour.DateTime}: ${hour.Temperature.Value}°${unitSymbol}, ${hour.IconPhrase}`,
-    }));
+
+    const content: TextContent[] = data.DailyForecasts.map((day: any) => {
+      const date = new Date(day.Date);
+      const formattedDate = date.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+      
+      return {
+        type: 'text',
+        text: `${formattedDate}: ${day.Temperature.Minimum.Value}${degreeSymbol}${unitSymbol} to ${day.Temperature.Maximum.Value}${degreeSymbol}${unitSymbol}, Day: ${day.Day.IconPhrase}, Night: ${day.Night.IconPhrase}${day.Day.HasPrecipitation || day.Night.HasPrecipitation ? ' (Precipitation expected)' : ''}`
+      };
+    });
 
     return { content };
   } catch (error) {
-    console.error("WeatherTool handler error:", error);
+    console.error("WeatherDailyTool handler error:", error);
     let errorMessage = "An error occurred while fetching weather data.";
 
     if (axios.isAxiosError(error)) {
@@ -109,4 +134,4 @@ export async function handler(
   }
 }
 
-export default { inputShape, inputSchema, inputJsonSchema, handler };
+export default { inputShape, inputSchema, inputJsonSchema, handler }; 

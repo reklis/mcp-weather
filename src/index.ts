@@ -2,13 +2,14 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema, Tool } from "@modelcontextprotocol/sdk/types.js";
-import { handler } from "./tools/WeatherTool.js";
+import { handler as hourlyHandler } from "./tools/WeatherTool.js";
+import { handler as dailyHandler } from "./tools/WeatherDailyTool.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
-// Define the tool in MCP-compatible format
-const weatherTool: Tool = {
+// Define the hourly forecast tool
+const hourlyWeatherTool: Tool = {
   name: "weather-get_hourly",
-  description: "Get hourly weather forecast",
+  description: "Get hourly weather forecast for the next 12 hours",
   inputSchema: {
     type: "object",
     properties: {
@@ -19,6 +20,41 @@ const weatherTool: Tool = {
       location: {
         type: "string",
         description: "The city or location for which to retrieve the weather forecast."
+      },
+      units: {
+        type: "string",
+        description: "Temperature unit system (metric for Celsius, imperial for Fahrenheit). Default is metric.",
+        enum: ["metric", "imperial"]
+      }
+    },
+    required: ["sessionId", "location"]
+  }
+};
+
+// Define the daily forecast tool
+const dailyWeatherTool: Tool = {
+  name: "weather-get_daily",
+  description: "Get daily weather forecast for up to 15 days",
+  inputSchema: {
+    type: "object",
+    properties: {
+      sessionId: {
+        type: "string",
+        description: "A unique identifier for the user session."
+      },
+      location: {
+        type: "string",
+        description: "The city or location for which to retrieve the weather forecast."
+      },
+      days: {
+        type: "number",
+        description: "Number of days to forecast (1, 5, 10, or 15). Default is 5.",
+        enum: [1, 5, 10, 15]
+      },
+      units: {
+        type: "string",
+        description: "Temperature unit system (metric for Celsius, imperial for Fahrenheit). Default is metric.",
+        enum: ["metric", "imperial"]
       }
     },
     required: ["sessionId", "location"]
@@ -28,7 +64,7 @@ const weatherTool: Tool = {
 const server = new Server(
   {
     name: "mcp-weather",
-    version: "0.1.0",
+    version: "0.2.0", // Increment version as we've added features
   },
   {
     capabilities: {
@@ -39,20 +75,23 @@ const server = new Server(
 
 // Set up request handlers
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: [weatherTool],
+  tools: [hourlyWeatherTool, dailyWeatherTool],
 }));
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
+    const args = request.params.arguments;
+    if (args === undefined) {
+      return {
+        content: [{ type: "text", text: "Error: No arguments provided for the tool." }],
+        isError: true
+      };
+    }
+    
     if (request.params.name === "weather-get_hourly") {
-      const args = request.params.arguments;
-      if (args === undefined) {
-        return {
-          content: [{ type: "text", text: "Error: No arguments provided for the tool." }],
-          isError: true
-        };
-      }
-      return await handler(args, {} as RequestHandlerExtra<any, any>);
+      return await hourlyHandler(args, {} as RequestHandlerExtra<any, any>);
+    } else if (request.params.name === "weather-get_daily") {
+      return await dailyHandler(args, {} as RequestHandlerExtra<any, any>);
     } else {
       return {
         content: [{ type: "text", text: `Unknown tool: ${request.params.name}` }],

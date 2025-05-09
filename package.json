@@ -1,10 +1,10 @@
 {
   "name": "@timlukahorstmann/mcp-weather",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "bin": {
     "mcp-weather": "./build/index.js"
   },
-  "description": "MCP server that provides hourly weather forecasts using the AccuWeather API",
+  "description": "MCP server that provides hourly and daily weather forecasts using the AccuWeather API",
   "type": "module",
   "main": "build/index.js",
   "scripts": {

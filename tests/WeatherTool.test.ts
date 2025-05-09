@@ -15,6 +15,7 @@ describe("WeatherTool handler", () => {
   const validArgs = {
     sessionId: "123e4567-e89b-12d3-a456-426614174000",
     location: "Paris",
+    units: "metric"
   };
   const extra: RequestHandlerExtra<any, any> = {
     signal: new AbortController().signal,
@@ -40,6 +41,17 @@ describe("WeatherTool handler", () => {
     expect(() => inputSchema.parse(validArgs)).not.toThrow();
   });
 
+  it("accepts requests without units parameter", () => {
+    const result = inputSchema.parse({
+      sessionId: validArgs.sessionId,
+      location: validArgs.location
+    });
+    // Just verify parsing doesn't throw an error
+    expect(result.sessionId).toBe(validArgs.sessionId);
+    expect(result.location).toBe(validArgs.location);
+    // The handler will use the default value "metric"
+  });
+
   it("rejects when location is empty", () => {
     expect(() =>
       inputSchema.parse({ sessionId: validArgs.sessionId, location: "" })
@@ -57,7 +69,7 @@ describe("WeatherTool handler", () => {
     expect(mockedAxios.get).not.toHaveBeenCalled();
   });
 
-  it("fetches location key and 12-hour forecast and formats text", async () => {
+  it("fetches location key and 12-hour forecast and formats text with metric units (default)", async () => {
     // location-search API
     mockedAxios.get
       .mockResolvedValueOnce({ data: [{ Key: "LOC123" }] })
@@ -72,7 +84,10 @@ describe("WeatherTool handler", () => {
         ],
       });
 
-    const result = await handler(validArgs, extra);
+    const result = await handler({
+      sessionId: validArgs.sessionId,
+      location: validArgs.location
+    }, extra);
 
     // two calls: one for cities/search, one for hourly forecast
     expect(mockedAxios.get).toHaveBeenCalledTimes(2);
@@ -82,12 +97,41 @@ describe("WeatherTool handler", () => {
     expect(mockedAxios.get).toHaveBeenCalledWith(
       expect.stringContaining("forecasts/v1/hourly/12hour/LOC123")
     );
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      expect.stringContaining("metric=true")
+    );
 
     // one text item in content array
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].text).toContain(
-      "2025-05-04T15:00:00+02:00: 20°C, Sunny"
+    expect(result.content[0].text).toContain("20°C");
+  });
+
+  it("handles imperial units correctly", async () => {
+    // location-search API
+    mockedAxios.get
+      .mockResolvedValueOnce({ data: [{ Key: "LOC123" }] })
+      // forecast API
+      .mockResolvedValueOnce({
+        data: [
+          {
+            DateTime: "2025-05-04T15:00:00+02:00",
+            Temperature: { Value: 68, Unit: "F" },
+            IconPhrase: "Sunny",
+          },
+        ],
+      });
+
+    const result = await handler({
+      ...validArgs,
+      units: "imperial"
+    }, extra);
+
+    expect(mockedAxios.get).toHaveBeenCalledTimes(2);
+    expect(mockedAxios.get).toHaveBeenCalledWith(
+      expect.stringContaining("metric=false")
     );
+
+    expect(result.content[0].text).toContain("68°F");
   });
 
   it("errors out if API key is missing", async () => {

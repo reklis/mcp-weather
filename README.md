@@ -13,7 +13,7 @@
   </a>
 </p>
 
-A Model Context Protocol (MCP) server that provides hourly weather forecasts using the AccuWeather API.
+A Model Context Protocol (MCP) server that provides hourly and daily weather forecasts using the AccuWeather API.
 
 ---
 
@@ -73,8 +73,10 @@ For integration with Claude Desktop or other MCP-compatible clients, add this to
 This MCP server allows large language models (like Claude) to access real-time weather data. When integrated with an LLM, it enables the model to:
 
 - Fetch accurate, up-to-date weather forecasts
-- Provide hourly weather data for any location
-- Access temperature, conditions, and other weather details
+- Provide hourly weather data for the next 12 hours
+- Access daily weather forecasts for up to 15 days
+- Display data in both metric (°C) and imperial (°F) units
+- View temperature, conditions, precipitation information, and other weather details
 
 ## Prerequisites
 
@@ -134,9 +136,29 @@ This MCP server allows large language models (like Claude) to access real-time w
 3. In a new conversation, enable the MCP server by clicking the plug icon and selecting "weather"
 
 4. Now you can ask Claude for weather forecasts, such as:
-   - "What's the weather forecast for New York City?"
-   - "Will it rain in London tomorrow?"
-   - "How hot will it be in Tokyo this afternoon?"
+   - "What's the hourly weather forecast for New York City?"
+   - "Give me the 5-day forecast for London."
+   - "What will the weather be like in Tokyo this week in Fahrenheit?"
+   - "Will it rain in San Francisco tomorrow?"
+
+## Available Tools
+
+### Hourly Weather Forecast
+- Tool name: `weather-get_hourly`
+- Provides hourly forecasts for the next 12 hours
+- Parameters:
+  - `sessionId` (required): Unique identifier for the session
+  - `location` (required): City or location name
+  - `units` (optional): "metric" (Celsius, default) or "imperial" (Fahrenheit)
+
+### Daily Weather Forecast
+- Tool name: `weather-get_daily`
+- Provides daily forecasts for up to 15 days
+- Parameters:
+  - `sessionId` (required): Unique identifier for the session
+  - `location` (required): City or location name
+  - `days` (optional): Number of forecast days (1, 5, 10, or 15; default is 5)
+  - `units` (optional): "metric" (Celsius, default) or "imperial" (Fahrenheit)
 
 ## Development
 
@@ -154,9 +176,10 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 We're always looking to improve the MCP Weather Server. Here are some features we're considering for future releases:
 
--   **Daily Forecasts:** Option to retrieve a summary for the next few days.
--   **Extended Hourly Forecasts:** Beyond 12 hours, e.g., 24 or 48 hours.
--   **More Configuration Options:** e.g., preferred units (Celsius/Fahrenheit) via input.
+- **Extended Hourly Forecasts:** Beyond 12 hours, e.g., 24 or 48 hours.
+- **Weather Alerts:** Integration with AccuWeather's severe weather alerts API.
+- **Location Autocomplete:** Improved location searching with autocomplete suggestions.
+- **Historical Weather Data:** Access to past weather conditions.
 
 If you have ideas for other features, feel free to open an issue!
 
