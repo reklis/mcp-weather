@@ -13,7 +13,6 @@ beforeAll(() => {
 
 describe("WeatherTool handler", () => {
   const validArgs = {
-    sessionId: "123e4567-e89b-12d3-a456-426614174000",
     location: "Paris",
     units: "metric"
   };
@@ -43,31 +42,20 @@ describe("WeatherTool handler", () => {
 
   it("accepts requests without units parameter", () => {
     const result = inputSchema.parse({
-      sessionId: validArgs.sessionId,
       location: validArgs.location
     });
     // Just verify parsing doesn't throw an error
-    expect(result.sessionId).toBe(validArgs.sessionId);
     expect(result.location).toBe(validArgs.location);
     // The handler will use the default value "metric"
   });
 
   it("rejects when location is empty", () => {
     expect(() =>
-      inputSchema.parse({ sessionId: validArgs.sessionId, location: "" })
+      inputSchema.parse({ location: "" })
     ).toThrow(/Location must be at least 1 character/);
   });
 
-  it("returns validation error when sessionId is empty", async () => {
-    const resp = await handler(
-      { sessionId: "", location: "London" },
-      extra
-    );
-    expect(resp.content[0].text).toMatch(
-      /Invalid input: sessionId: SessionId must be at least 1 character/
-    );
-    expect(mockedAxios.get).not.toHaveBeenCalled();
-  });
+  // Removed test for sessionId validation as it's no longer a requirement
 
   it("fetches location key and 12-hour forecast and formats text with metric units (default)", async () => {
     // location-search API
@@ -85,7 +73,6 @@ describe("WeatherTool handler", () => {
       });
 
     const result = await handler({
-      sessionId: validArgs.sessionId,
       location: validArgs.location
     }, extra);
 

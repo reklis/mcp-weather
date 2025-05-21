@@ -183,6 +183,15 @@ We're always looking to improve the MCP Weather Server. Here are some features w
 
 If you have ideas for other features, feel free to open an issue!
 
+## Changelog
+
+### 0.4.0
+- Removed `sessionId` requirement from all tools as it was not used for anything internally
+- This simplifies integrations and reduces confusion for LLM usage
+
+### 0.3.0 and earlier
+- Initial releases with basic functionality
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

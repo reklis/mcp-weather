@@ -5,7 +5,6 @@ import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/proto
 
 // Zod schemas for validation
 export const inputShape = {
-  sessionId: z.string().min(1, "SessionId must be at least 1 character"),
   location: z.string().min(1, "Location must be at least 1 character"),
   days: z.number().int().min(1).max(15).default(5).optional().describe("Number of days for forecast (1-15)"),
   units: z.enum(["imperial", "metric"]).default("metric").optional().describe("Temperature unit system")
@@ -18,10 +17,6 @@ export const inputJsonSchema = {
   type: "object",
   description: "Parameters for the daily weather-forecast tool",
   properties: {
-    sessionId: {
-      type: "string",
-      description: "A unique session identifier (UUID)",
-    },
     location: {
       type: "string",
       description: "The location to fetch the daily forecast for",
@@ -37,7 +32,7 @@ export const inputJsonSchema = {
       enum: ["metric", "imperial"]
     }
   },
-  required: ["sessionId", "location"],
+  required: ["location"],
   additionalProperties: false,
 };
 
@@ -60,7 +55,7 @@ export async function handler(
     return { content: [{ type: 'text', text: 'An unexpected error occurred during input validation.' }] };
   }
 
-  const { sessionId, location, days = 5, units = "metric" } = validatedArgs;
+  const { location, days = 5, units = "metric" } = validatedArgs;
   const apiKey = process.env.ACCUWEATHER_API_KEY;
   if (!apiKey) {
     return { content: [{ type: 'text', text: 'Error: AccuWeather API key not configured' }] };

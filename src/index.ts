@@ -13,10 +13,6 @@ const hourlyWeatherTool: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      sessionId: {
-        type: "string",
-        description: "A unique identifier for the user session."
-      },
       location: {
         type: "string",
         description: "The city or location for which to retrieve the weather forecast."
@@ -27,7 +23,7 @@ const hourlyWeatherTool: Tool = {
         enum: ["metric", "imperial"]
       }
     },
-    required: ["sessionId", "location"]
+    required: ["location"]
   }
 };
 
@@ -38,10 +34,6 @@ const dailyWeatherTool: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      sessionId: {
-        type: "string",
-        description: "A unique identifier for the user session."
-      },
       location: {
         type: "string",
         description: "The city or location for which to retrieve the weather forecast."
@@ -57,14 +49,14 @@ const dailyWeatherTool: Tool = {
         enum: ["metric", "imperial"]
       }
     },
-    required: ["sessionId", "location"]
+    required: ["location"]
   }
 };
 
 const server = new Server(
   {
     name: "mcp-weather",
-    version: "0.2.0", // Increment version as we've added features
+    version: "0.4.0", // Removed sessionId requirement
   },
   {
     capabilities: {

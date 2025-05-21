@@ -13,7 +13,6 @@ beforeAll(() => {
 
 describe("WeatherDailyTool handler", () => {
   const validArgs = {
-    sessionId: "123e4567-e89b-12d3-a456-426614174000",
     location: "Paris",
     days: 5,
     units: "metric"
@@ -44,11 +43,9 @@ describe("WeatherDailyTool handler", () => {
 
   it("accepts requests with minimal required parameters", () => {
     const result = inputSchema.parse({
-      sessionId: validArgs.sessionId,
       location: validArgs.location
     });
     // Just verify parsing doesn't throw an error
-    expect(result.sessionId).toBe(validArgs.sessionId);
     expect(result.location).toBe(validArgs.location);
     // The handler will use default values for days (5) and units ("metric")
   });
@@ -56,7 +53,6 @@ describe("WeatherDailyTool handler", () => {
   it("rejects when location is empty", () => {
     expect(() =>
       inputSchema.parse({ 
-        sessionId: validArgs.sessionId, 
         location: "",
         days: 5,
         units: "metric"
