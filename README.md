@@ -78,6 +78,23 @@ This MCP server allows large language models (like Claude) to access real-time w
 - Display data in both metric (°C) and imperial (°F) units
 - View temperature, conditions, precipitation information, and other weather details
 
+## Available Tools
+
+### Hourly Weather Forecast
+- Tool name: `weather-get_hourly`
+- Provides hourly forecasts for the next 12 hours
+- Parameters:
+  - `location` (required): City or location name
+  - `units` (optional): "metric" (Celsius, default) or "imperial" (Fahrenheit)
+
+### Daily Weather Forecast
+- Tool name: `weather-get_daily`
+- Provides daily forecasts for up to 15 days
+- Parameters:
+  - `location` (required): City or location name
+  - `days` (optional): Number of forecast days (1, 5, 10, or 15; default is 5)
+  - `units` (optional): "metric" (Celsius, default) or "imperial" (Fahrenheit)
+
 ## Prerequisites
 
 - Node.js ≥18  
@@ -140,25 +157,6 @@ This MCP server allows large language models (like Claude) to access real-time w
    - "Give me the 5-day forecast for London."
    - "What will the weather be like in Tokyo this week in Fahrenheit?"
    - "Will it rain in San Francisco tomorrow?"
-
-## Available Tools
-
-### Hourly Weather Forecast
-- Tool name: `weather-get_hourly`
-- Provides hourly forecasts for the next 12 hours
-- Parameters:
-  - `sessionId` (required): Unique identifier for the session
-  - `location` (required): City or location name
-  - `units` (optional): "metric" (Celsius, default) or "imperial" (Fahrenheit)
-
-### Daily Weather Forecast
-- Tool name: `weather-get_daily`
-- Provides daily forecasts for up to 15 days
-- Parameters:
-  - `sessionId` (required): Unique identifier for the session
-  - `location` (required): City or location name
-  - `days` (optional): Number of forecast days (1, 5, 10, or 15; default is 5)
-  - `units` (optional): "metric" (Celsius, default) or "imperial" (Fahrenheit)
 
 ## Development
 
