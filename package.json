@@ -10,17 +10,24 @@
   "scripts": {
     "build": "tsc",
     "start": "node build/index.js",
+    "start:http": "node build/http-server.js",
     "dev": "ts-node --esm src/index.ts",
+    "dev:http": "ts-node --esm src/http-server.ts",
     "test": "jest",
     "prepare": "npm run build",
     "lint": "eslint \"src/**/*.{ts,js}\""
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.11.0",
+    "@modelcontextprotocol/sdk": "^1.17.3",
     "axios": "^1.9.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
     "zod": "^3.24.3"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
     "@types/istanbul-lib-coverage": "^2.0.6",
     "@types/istanbul-reports": "^3.0.4",
     "@types/jest": "^29.5.14",

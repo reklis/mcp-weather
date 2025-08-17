@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { CallToolRequestSchema, ListToolsRequestSchema, Tool } from "@modelcontextprotocol/sdk/types.js";
 import { handler as hourlyHandler } from "./tools/WeatherTool.js";
 import { handler as dailyHandler } from "./tools/WeatherDailyTool.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
-// Define the hourly forecast tool
 const hourlyWeatherTool: Tool = {
   name: "weather-get_hourly",
   description: "Get hourly weather forecast for the next 12 hours",
@@ -28,7 +29,6 @@ const hourlyWeatherTool: Tool = {
   }
 };
 
-// Define the daily forecast tool
 const dailyWeatherTool: Tool = {
   name: "weather-get_daily",
   description: "Get daily weather forecast for up to 15 days",
@@ -57,7 +57,7 @@ const dailyWeatherTool: Tool = {
 const server = new Server(
   {
     name: "mcp-weather",
-    version: "0.4.0", // Removed sessionId requirement
+    version: "0.4.1",
   },
   {
     capabilities: {
@@ -66,7 +66,6 @@ const server = new Server(
   }
 );
 
-// Set up request handlers
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [hourlyWeatherTool, dailyWeatherTool],
 }));
@@ -99,13 +98,34 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 });
 
-async function runServer() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error("Weather MCP Server running on stdio");
-}
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-runServer().catch((err) => {
-  console.error("Server error:", err);
+app.use(cors());
+app.use(express.json());
+
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok', server: 'mcp-weather' });
+});
+
+// Create transport with stateless mode for simplicity
+const httpTransport = new StreamableHTTPServerTransport({
+  sessionIdGenerator: undefined, // Stateless mode
+  enableJsonResponse: false // Use SSE streaming
+});
+
+// Handle MCP requests
+app.all('/mcp', async (req, res) => {
+  await httpTransport.handleRequest(req, res, req.body);
+});
+
+server.connect(httpTransport).then(() => {
+  console.error('MCP server connected to HTTP transport');
+  app.listen(PORT, () => {
+    console.error(`Weather MCP Server running on http://localhost:${PORT}`);
+    console.error(`MCP endpoint: http://localhost:${PORT}/mcp`);
+  });
+}).catch((error) => {
+  console.error('Failed to connect MCP server:', error);
   process.exit(1);
 });
